@@ -9,6 +9,8 @@ use App\Livewire\Auth\Passwords\Email;
 use App\Livewire\Auth\Passwords\Reset;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\Verify;
+use App\Models\Post;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use \Illuminate\Support\Facades\Http;
 
@@ -42,9 +44,14 @@ Route::get('dispatch-slow-job', function () {
 })->name('dispatch-slow-job');
 
 Route::get('slow-query', function () {
-    DB::table('users')->where('id', 1)->get();
+    $users = User::all();
 
-    return 'Slow query';
+    $worstPossibleQuery = DB::table('users')
+        ->crossJoin('posts')
+        ->orderBy(DB::raw('RAND()'))
+        ->select('users.*', 'posts.content')
+        ->limit(1000000)
+        ->get();
 })->name('slow-query');
 
 Route::get('throw-exception', function () {
